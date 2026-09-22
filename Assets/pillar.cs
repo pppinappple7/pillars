@@ -6,12 +6,10 @@ public class pillar : MonoBehaviour
 {
     [SerializeField]Mesh initialMesh;
     MeshFilter meshFilter;
-    [SerializeField] float breakWarnTime;
-    [SerializeField] Mesh broken;
-    [SerializeField] float breakTime;
-    float breakTimer;
+    public float moveSpeedpeed;
+    float verticalOffset;
     [SerializeField] TextMeshProUGUI letterText;
-    GameObject player;
+    Player player;
     Manager manager;
     private static readonly System.Random random = new System.Random();
     char charecter;
@@ -24,68 +22,94 @@ public class pillar : MonoBehaviour
     }
     private void OnEnable()
     {
+        verticalOffset = Random.Range(-0.7f, 0.7f);
         meshFilter = GetComponent<MeshFilter>();
-        player = GameObject.Find("player");
-        manager = GameObject.Find("manager").GetComponent<Manager>();
-        manager.usedChars.Add(charecter);
+        player = GameObject.Find("player").GetComponent<Player>();
+        manager = GameObject.Find("spawnManager").GetComponent<Manager>();
+        
    
         charecter = UnusedChar();
+        manager.usedChars.Add(charecter);
         
-        meshFilter.mesh=initialMesh;
-        transform.position = RandomStartPos();
-        breakTimer = 0;
+        transform.position = new Vector3(10,-25,RandomStartPos());
+        
     }
     // Update is called once per frame
     void Update()
     {
-        breakTimer += Time.deltaTime;
-        if(breakTimer>=breakTime-breakWarnTime)
+        transform.Translate(Vector3.left*Time.deltaTime*moveSpeedpeed);
+        if(transform.position.x>=-9)
         {
-            if(meshFilter.mesh!=broken)
+            if (transform.position.y < -11.5+verticalOffset)
             {
-                meshFilter.mesh = broken;
+                transform.Translate(Vector3.up * 15 * Time.deltaTime);
+
+            }
+            
+            else
+            {
+                if (Input.GetKeyDown(keyCode))
+                {
+                    player.curentPillar = gameObject;
+                }
             }
         }
-        if(breakTimer>=breakTime)
-        {
-            manager.usedPos.Remove(new Vector3(transform.position.x, -24.95f, transform.position.z));
-            manager.usedChars.Remove(charecter);
-            gameObject.SetActive(false);
-            
-        }
-        if(transform.position.y< -11.5)
-        {
-            transform.Translate(Vector3.up *15* Time.deltaTime);
-            
-        }
-        else if(transform.position.y> -11.5)
-        {
-            transform.position = new Vector3(transform.position.x, -11.5f, transform.position.z);
-        }
-
-
         else
         {
-            if(Input.GetKeyDown(keyCode))
+            transform.Translate(Vector3.up * -15 * Time.deltaTime);
+            if(transform.position.y<=-25)
             {
-                player.transform.position=new Vector3(transform.position.x,player.transform.position.y,transform.position.z);
+                manager.usedChars.Remove(charecter);
+                manager.usedPos.Remove((int)transform.position.z);
+                gameObject.SetActive(false);
             }
         }
     }
-    Vector3 RandomStartPos()
+    int RandomStartPos()
     {
-        float x = Random.Range(-2, 3) * 4;
-        float z = Random.Range(0,3) * 2;
-        if(manager.usedPos.Contains(new Vector3(x, -24.95f, z)))
+        
+        if (manager != null && manager.usedPos.Count >= 15)
         {
-            return RandomStartPos();
+            manager.usedPos.Clear();
         }
-        else
+
+        int maxAttempts = 100;
+        int currentAttempt = 0;
+
+        while (currentAttempt < maxAttempts)
         {
-            manager.usedPos.Add(new Vector3(x, -24.95f, z));
-            return new Vector3(x, -24.95f, z);
-        }
             
+            
+            int targetPos = Random.Range(0, 6);
+
+            bool isOccupied = false;
+
+            if (manager != null)
+            {
+                foreach (int pos in manager.usedPos)
+                {
+                    if (pos==targetPos)
+                    {
+                        isOccupied = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!isOccupied)
+            {
+                if (manager != null)
+                {
+                    manager.usedPos.Add(targetPos);
+                }
+                return targetPos;
+            }
+
+            currentAttempt++;
+        }
+
+        manager.usedPos.Clear();
+        return Random.Range(0, 6);
     }
     char UnusedChar()
     {

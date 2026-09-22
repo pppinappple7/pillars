@@ -8,7 +8,7 @@ public class Manager : MonoBehaviour
     [SerializeField] float spawnTime;
     [SerializeField]float spawnTimer;
     [SerializeField]GameObject[] pillarPull;
-    public List<Vector3> usedPos;
+    public List<int> usedPos;
     public List<char> usedChars;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
