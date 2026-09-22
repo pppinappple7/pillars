@@ -4,8 +4,12 @@ using UnityEngine;
 
 public class pillar : MonoBehaviour
 {
+    Material initialMaterial;
+    [SerializeField]AudioSource shootSFX;
+    [SerializeField] Material shotMaterial;
+    float shotTime;
     [SerializeField]Mesh initialMesh;
-    MeshFilter meshFilter;
+    MeshRenderer meshRenderer;
     public float moveSpeedpeed;
     float verticalOffset;
     [SerializeField] TextMeshProUGUI letterText;
@@ -17,13 +21,14 @@ public class pillar : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        initialMaterial=meshRenderer.material;
 
     }
     private void OnEnable()
     {
+        shotTime = 0;
         verticalOffset = Random.Range(-0.7f, 0.7f);
-        meshFilter = GetComponent<MeshFilter>();
+        meshRenderer = GetComponent<MeshRenderer>();
         player = GameObject.Find("player").GetComponent<Player>();
         manager = GameObject.Find("spawnManager").GetComponent<Manager>();
         
@@ -37,6 +42,23 @@ public class pillar : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (shotTime > 0) 
+        {
+            shotTime += Time.deltaTime;
+            shotMaterial.SetColor("_EmissionColor",Color.white * shotTime / 1);
+            if(shotTime>1.5f)
+            {
+                if (player.curentPillar == gameObject)
+                {
+                    player.curentPillar = null;
+                }
+                
+                manager.usedChars.Remove(charecter);
+                manager.usedPos.Remove((int)transform.position.z);
+                gameObject.SetActive(false);
+                meshRenderer.material = initialMaterial;
+            }
+        }
         transform.Translate(Vector3.left*Time.deltaTime*moveSpeedpeed);
         if(transform.position.x>=-9)
         {
@@ -56,12 +78,17 @@ public class pillar : MonoBehaviour
         }
         else
         {
+            if (player.curentPillar == gameObject)
+            {
+                player.curentPillar = null;
+            }
             transform.Translate(Vector3.up * -15 * Time.deltaTime);
             if(transform.position.y<=-25)
             {
                 manager.usedChars.Remove(charecter);
                 manager.usedPos.Remove((int)transform.position.z);
                 gameObject.SetActive(false);
+                meshRenderer.material = initialMaterial;
             }
         }
     }
@@ -125,5 +152,11 @@ public class pillar : MonoBehaviour
             letterText.text = ch.ToString();
             return ch;
         }
+    }
+    public void Shoot()
+    {
+        shootSFX.Play();
+        shotTime += Time.deltaTime;
+        meshRenderer.material = shotMaterial;
     }
 }
