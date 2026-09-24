@@ -367,8 +367,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60e573b2c1427c847b7bc34ee842648e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::pillar
+  shootSFX: {fileID: 0}
+  shotMaterial: {fileID: 2100000, guid: 237d54d11bf71294bac4e9c4c68ca372, type: 2}
   initialMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
-  breakWarnTime: 0.5
-  broken: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
-  breakTime: 2
+  moveSpeed: 3
   letterText: {fileID: 3510201834875529801}
