@@ -25,6 +25,10 @@ public class ScoreManager : MonoBehaviour
     public void StopCount()
     {
         counting = false;
-        PlayerPrefs.SetInt("score", (int)score);
+        if(score>PlayerPrefs.GetInt("score"))
+        {
+            PlayerPrefs.SetInt("score", (int)score);
+        }
+        
     }
 }

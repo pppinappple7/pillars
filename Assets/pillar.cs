@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class pillar : MonoBehaviour
 {
-    Material initialMaterial;
+    [SerializeField]Material initialMaterial;
     [SerializeField] AudioSource shootSFX;
     [SerializeField] Material shotMaterial;
     float shotTime;
-    [SerializeField] Mesh initialMesh;
-    MeshRenderer meshRenderer;
+    [SerializeField]GameObject shot;
+    [SerializeField] MeshRenderer meshRenderer;
     public float moveSpeed;
     float verticalOffset;
     [SerializeField] TextMeshProUGUI letterText;
@@ -21,14 +21,15 @@ public class pillar : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        initialMaterial = meshRenderer.material;
+        
 
     }
     private void OnEnable()
     {
+        
         shotTime = 0;
         verticalOffset = Random.Range(-0.7f, 0.7f);
-        meshRenderer = GetComponent<MeshRenderer>();
+        
         player = GameObject.Find("player").GetComponent<Player>();
         manager = GameObject.Find("spawnManager").GetComponent<Manager>();
 
@@ -42,8 +43,11 @@ public class pillar : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        
+        
         if (shotTime > 0)
         {
+
             shotTime += Time.deltaTime;
             shotMaterial.SetColor("_EmissionColor", Color.white * shotTime / 1);
             if (shotTime > 1.5f)
@@ -52,7 +56,7 @@ public class pillar : MonoBehaviour
                 {
                     player.curentPillar = null;
                 }
-
+                shot.SetActive(true);
                 manager.usedChars.Remove(charecter);
                 manager.usedPos.Remove((int)transform.position.z);
                 gameObject.SetActive(false);
