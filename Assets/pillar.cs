@@ -5,12 +5,12 @@ using UnityEngine;
 public class pillar : MonoBehaviour
 {
     Material initialMaterial;
-    [SerializeField]AudioSource shootSFX;
+    [SerializeField] AudioSource shootSFX;
     [SerializeField] Material shotMaterial;
     float shotTime;
-    [SerializeField]Mesh initialMesh;
+    [SerializeField] Mesh initialMesh;
     MeshRenderer meshRenderer;
-    public float moveSpeedpeed;
+    public float moveSpeed;
     float verticalOffset;
     [SerializeField] TextMeshProUGUI letterText;
     Player player;
@@ -21,7 +21,7 @@ public class pillar : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        initialMaterial=meshRenderer.material;
+        initialMaterial = meshRenderer.material;
 
     }
     private void OnEnable()
@@ -31,43 +31,43 @@ public class pillar : MonoBehaviour
         meshRenderer = GetComponent<MeshRenderer>();
         player = GameObject.Find("player").GetComponent<Player>();
         manager = GameObject.Find("spawnManager").GetComponent<Manager>();
-        
-   
+
+
         charecter = UnusedChar();
         manager.usedChars.Add(charecter);
-        
-        transform.position = new Vector3(10,-25,RandomStartPos());
-        
+
+        transform.position = new Vector3(11, -25, RandomStartPos());
+
     }
     // Update is called once per frame
     void Update()
     {
-        if (shotTime > 0) 
+        if (shotTime > 0)
         {
             shotTime += Time.deltaTime;
-            shotMaterial.SetColor("_EmissionColor",Color.white * shotTime / 1);
-            if(shotTime>1.5f)
+            shotMaterial.SetColor("_EmissionColor", Color.white * shotTime / 1);
+            if (shotTime > 1.5f)
             {
                 if (player.curentPillar == gameObject)
                 {
                     player.curentPillar = null;
                 }
-                
+
                 manager.usedChars.Remove(charecter);
                 manager.usedPos.Remove((int)transform.position.z);
                 gameObject.SetActive(false);
                 meshRenderer.material = initialMaterial;
             }
         }
-        transform.Translate(Vector3.left*Time.deltaTime*moveSpeedpeed);
-        if(transform.position.x>=-9)
+        transform.Translate(Vector3.left * Time.deltaTime * moveSpeed);
+        if (transform.position.x >= -11)
         {
-            if (transform.position.y < -11.5+verticalOffset)
+            if (transform.position.y < -11.5 + verticalOffset)
             {
                 transform.Translate(Vector3.up * 15 * Time.deltaTime);
 
             }
-            
+
             else
             {
                 if (Input.GetKeyDown(keyCode))
@@ -83,7 +83,7 @@ public class pillar : MonoBehaviour
                 player.curentPillar = null;
             }
             transform.Translate(Vector3.up * -15 * Time.deltaTime);
-            if(transform.position.y<=-25)
+            if (transform.position.y <= -25)
             {
                 manager.usedChars.Remove(charecter);
                 manager.usedPos.Remove((int)transform.position.z);
@@ -94,7 +94,7 @@ public class pillar : MonoBehaviour
     }
     int RandomStartPos()
     {
-        
+
         if (manager != null && manager.usedPos.Count >= 15)
         {
             manager.usedPos.Clear();
@@ -105,8 +105,8 @@ public class pillar : MonoBehaviour
 
         while (currentAttempt < maxAttempts)
         {
-            
-            
+
+
             int targetPos = Random.Range(0, 6);
 
             bool isOccupied = false;
@@ -115,7 +115,7 @@ public class pillar : MonoBehaviour
             {
                 foreach (int pos in manager.usedPos)
                 {
-                    if (pos==targetPos)
+                    if (pos == targetPos)
                     {
                         isOccupied = true;
                         break;
@@ -147,8 +147,8 @@ public class pillar : MonoBehaviour
         }
         else
         {
-            
-            keyCode=(KeyCode)System.Enum.Parse(typeof(KeyCode),ch.ToString());
+
+            keyCode = (KeyCode)System.Enum.Parse(typeof(KeyCode), ch.ToString());
             letterText.text = ch.ToString();
             return ch;
         }
