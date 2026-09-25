@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 public class MenuFunctions : MonoBehaviour
 {
+
     [SerializeField] bool pause;
     private void OnEnable()
     {
@@ -24,5 +25,6 @@ public class MenuFunctions : MonoBehaviour
         Time.timeScale = 1;
         gameObject.SetActive(false);
     }
+    
 
 }
