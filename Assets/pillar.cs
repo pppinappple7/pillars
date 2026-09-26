@@ -56,7 +56,11 @@ public class pillar : MonoBehaviour
                 {
                     player.curentPillar = null;
                 }
-                shot.SetActive(true);
+                if(PlayerPrefs.GetInt("ReduceFlashes")==0)
+                {
+                    shot.SetActive(true);
+                }
+                
                 manager.usedChars.Remove(charecter);
                 manager.usedPos.Remove((int)transform.position.z);
                 gameObject.SetActive(false);
@@ -76,6 +80,9 @@ public class pillar : MonoBehaviour
             {
                 if (Input.GetKeyDown(keyCode))
                 {
+                    player.transform.LookAt(transform.position);
+                    player.transform.eulerAngles=new Vector3(0, transform.eulerAngles.y, 0);
+                    player.animator.SetBool("dash",true);
                     player.curentPillar = gameObject;
                 }
             }
