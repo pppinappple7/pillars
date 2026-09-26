@@ -1,64 +1,99 @@
-
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using System.Collections.Generic;
 using UnityEngine.UI;
 
 public class VirtualScreenClicker : MonoBehaviour
 {
-    public Camera mainCamera; // Main Camera (1)
-    public Camera uiCamera; // Game Camera
-    public Collider monitorCollider;// Plane
+    public Camera mainCamera;       // Main Camera (1)
+    public Camera uiCamera;         // Game Camera
+    public Collider monitorCollider;// Коллайдер экрана
+
+    private PointerEventData pointerData;
+    private List<GameObject> hoveredObjects = new List<GameObject>();
+
+    void Start()
+    {
+        pointerData = new PointerEventData(EventSystem.current);
+    }
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit) && hit.collider == monitorCollider)
         {
-            Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
+            Vector2 uv = hit.textureCoord;
 
-            if (Physics.Raycast(ray, out hit) && hit.collider == monitorCollider)
+            // Если оси инвертированы на новой модели, раскомментируй:
+            // uv.x = 1f - uv.x; 
+            // uv.y = 1f - uv.y; 
+
+            float virtualX = uv.x * uiCamera.pixelWidth;
+            float virtualY = uv.y * uiCamera.pixelHeight;
+            pointerData.position = new Vector2(virtualX, virtualY);
+
+            // Имитируем движение мыши для EventSystem
+            List<RaycastResult> results = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(pointerData, results);
+
+            // Используем стандартный механизм Unity для обработки Hover (наведения)
+            // Это заставит Event Trigger на любом объекте думать, что это реальная мышь
+            pointerData.pointerCurrentRaycast = results.Count > 0 ? results[0] : new RaycastResult();
+
+            // Заставляем Unity обработать Enter/Exit для всех элементов в иерархии под курсором
+            HandlePointerExitAndEnter(pointerData, results.Count > 0 ? results[0].gameObject : null);
+
+            // Обработка клика
+            if (Input.GetMouseButtonDown(0) && results.Count > 0)
             {
-                // Трансформируем глобальную точку клика в локальные координаты самого Plane
-                Vector3 localHitPoint = monitorCollider.transform.InverseTransformPoint(hit.point);
+                GameObject target = results[0].gameObject;
 
-                // Стандартный Plane в Unity имеет размер 10х10 единиц в плоскости XZ
-                // Переводим локальные X и Z в диапазон от 0 до 1
-                float normalizedX = localHitPoint.x + 5f; // из -5..5 делаем 0..10
-                float normalizedY = localHitPoint.z + 5f; // Plane лежит в плоскости XZ, поэтому берем Z вместо Y
+                // Проверяем обычную кнопку
+                Button button = target.GetComponentInParent<Button>();
+                if (button != null) target = button.gameObject;
 
-                normalizedX /= 10f; // Делаем диапазон 0..1
-                normalizedY /= 10f;
-
-                // Если картинка отзеркалена по горизонтали или вертикали, 
-                // можно раскомментировать строчки ниже для инверсии:
-                 normalizedX = 1f - normalizedX; 
-                 normalizedY = 1f - normalizedY;
-
-                // Переводим в пиксели виртуального экрана
-                float virtualX = normalizedX * uiCamera.pixelWidth;
-                float virtualY = normalizedY * uiCamera.pixelHeight;
-                Debug.Log($"Клик в пикселях UI: X = {virtualX} (Ширина экрана: {uiCamera.pixelWidth}), Y = {virtualY} (Высота экрана: {uiCamera.pixelHeight})");
-
-                Vector3 virtualMousePos = new Vector3(virtualX, virtualY, 0);
-
-                // Отправляем клик в UI
-                PointerEventData pointerData = new PointerEventData(EventSystem.current);
-                pointerData.position = virtualMousePos;
-
-                List<RaycastResult> results = new List<RaycastResult>();
-                EventSystem.current.RaycastAll(pointerData, results);
-
-                foreach (RaycastResult result in results)
-                {
-                    GameObject target = result.gameObject;
-                    Button button = target.GetComponentInParent<Button>();
-                    if (button != null) target = button.gameObject;
-
-                    ExecuteEvents.Execute(target, pointerData, ExecuteEvents.pointerClickHandler);
-                    break;
-                }
+                ExecuteEvents.Execute(target, pointerData, ExecuteEvents.pointerClickHandler);
             }
+        }
+        else
+        {
+            // Если убрали мышь с монитора, очищаем все наведения
+            HandlePointerExitAndEnter(pointerData, null);
+        }
+    }
+
+    private void HandlePointerExitAndEnter(PointerEventData currentPointerData, GameObject currentTarget)
+    {
+        // Функция полностью имитирует системный проход мыши по кнопкам,
+        // дергая Event Trigger (Pointer Enter / Pointer Exit) у любого объекта автоматичеки
+        if (currentTarget == null)
+        {
+            for (int i = 0; i < hoveredObjects.Count; i++)
+            {
+                ExecuteEvents.Execute(hoveredObjects[i], currentPointerData, ExecuteEvents.pointerExitHandler);
+            }
+            hoveredObjects.Clear();
+            return;
+        }
+
+        if (hoveredObjects.Count > 0 && hoveredObjects[0] == currentTarget) return;
+
+        // Очищаем старые
+        for (int i = 0; i < hoveredObjects.Count; i++)
+        {
+            ExecuteEvents.Execute(hoveredObjects[i], currentPointerData, ExecuteEvents.pointerExitHandler);
+        }
+        hoveredObjects.Clear();
+
+        // Добавляем новые элементы и всю их иерархию родителей (важно для Event Trigger)
+        GameObject t = currentTarget;
+        while (t != null)
+        {
+            hoveredObjects.Add(t);
+            ExecuteEvents.Execute(t, currentPointerData, ExecuteEvents.pointerEnterHandler);
+            t = t.transform.parent != null ? t.transform.parent.gameObject : null;
         }
     }
 }
