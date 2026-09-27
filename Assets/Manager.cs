@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class Manager : MonoBehaviour
 {
-
+    public float speedMult = 1f;
     float timeOffset;
     [SerializeField] GameObject pause;
     [SerializeField] float spawnTime;
@@ -21,18 +21,19 @@ public class Manager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        speedMult += Time.deltaTime / 240;
         if (Input.GetKey(KeyCode.Escape))
         {
             pause.SetActive(true);
         }
-        spawnTimer += Time.deltaTime;
+        spawnTimer += speedMult*Time.deltaTime;
         if (spawnTimer > spawnTime+timeOffset)
         {
             
             
             SpawnPillar();
             spawnTimer = 0;
-            timeOffset = Random.Range(-0.5f * spawnTime, 0.25f * spawnTime);
+            timeOffset = Random.Range(-0.5f * spawnTime, 0.2f * spawnTime);
         }
     }
     void SpawnPillar()

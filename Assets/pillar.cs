@@ -4,10 +4,13 @@ using UnityEngine;
 
 public class pillar : MonoBehaviour
 {
+    [SerializeField] GameObject crosshair;
+    public float shootTime = 0;
+    
     [SerializeField]Material initialMaterial;
     [SerializeField] AudioSource shootSFX;
     [SerializeField] Material shotMaterial;
-    float shotTime;
+    public float shotTime;
     [SerializeField]GameObject shot;
     [SerializeField] MeshRenderer meshRenderer;
     public float moveSpeed;
@@ -44,7 +47,18 @@ public class pillar : MonoBehaviour
     void Update()
     {
         
-        
+        if (shootTime > 0)
+        {
+            shootTime += Time.deltaTime;
+            if(shootTime>2)
+            {
+                if (player.curentPillar == gameObject)
+                {
+                    player.curentPillar = null;
+                }
+                crosshair.SetActive(false);
+            }
+        }
         if (shotTime > 0)
         {
 
@@ -56,19 +70,24 @@ public class pillar : MonoBehaviour
                 {
                     player.curentPillar = null;
                 }
-                shot.SetActive(true);
+                if(PlayerPrefs.GetInt("ReduceFlashes")==0)
+                {
+                    shot.SetActive(true);
+                }
+                shootTime = 0;
+                crosshair.SetActive(false);
                 manager.usedChars.Remove(charecter);
                 manager.usedPos.Remove((int)transform.position.z);
                 gameObject.SetActive(false);
                 meshRenderer.material = initialMaterial;
             }
         }
-        transform.Translate(Vector3.left * Time.deltaTime * moveSpeed);
+        transform.Translate(Vector3.left * Time.deltaTime * manager.speedMult * moveSpeed);
         if (transform.position.x >= -11)
         {
             if (transform.position.y < -11.5 + verticalOffset)
             {
-                transform.Translate(Vector3.up * 15 * Time.deltaTime);
+                transform.Translate(Vector3.up * 15 * Time.deltaTime * manager.speedMult);
 
             }
 
@@ -76,6 +95,9 @@ public class pillar : MonoBehaviour
             {
                 if (Input.GetKeyDown(keyCode))
                 {
+                    player.transform.LookAt(transform.position);
+                    player.transform.eulerAngles=new Vector3(0, transform.eulerAngles.y, 0);
+                    player.animator.SetBool("dash",true);
                     player.curentPillar = gameObject;
                 }
             }
@@ -86,9 +108,12 @@ public class pillar : MonoBehaviour
             {
                 player.curentPillar = null;
             }
-            transform.Translate(Vector3.up * -15 * Time.deltaTime);
+            transform.Translate(Vector3.up * -15 * Time.deltaTime * manager.speedMult);
             if (transform.position.y <= -25)
             {
+                shotTime = 0;
+                shootTime = 0;
+                crosshair.SetActive(false);
                 manager.usedChars.Remove(charecter);
                 manager.usedPos.Remove((int)transform.position.z);
                 gameObject.SetActive(false);
@@ -162,5 +187,11 @@ public class pillar : MonoBehaviour
         shootSFX.Play();
         shotTime += Time.deltaTime;
         meshRenderer.material = shotMaterial;
+    }
+    public void Gun()
+    {
+        shootTime += Time.deltaTime;
+        crosshair.SetActive(true);
+        
     }
 }

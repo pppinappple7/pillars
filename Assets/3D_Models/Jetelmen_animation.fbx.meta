@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 07223623053e191419bb82ad5aa128c3
+guid: 0e49a1d1a13590b4193cb4e24941b6b1
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -29,94 +29,7 @@ ModelImporter:
     animationWrapMode: 0
     extraExposedTransformPaths: []
     extraUserProperties: []
-    clipAnimations:
-    - serializedVersion: 16
-      name: "\u0410\u0440\u043C\u0430\u0442\u0443\u0440\u0430|Armature|mixamo.com|Layer0"
-      takeName: "\u0410\u0440\u043C\u0430\u0442\u0443\u0440\u0430|Armature|mixamo.com|Layer0"
-      internalID: 8562344725900153058
-      firstFrame: 0
-      lastFrame: 0
-      wrapMode: 0
-      orientationOffsetY: 0
-      level: 0
-      cycleOffset: 0
-      loop: 0
-      hasAdditiveReferencePose: 0
-      loopTime: 0
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
-      keepOriginalOrientation: 0
-      keepOriginalPositionY: 1
-      keepOriginalPositionXZ: 0
-      heightFromFeet: 0
-      mirror: 0
-      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
-      events: []
-      transformMask: []
-      maskType: 3
-      maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
-    - serializedVersion: 16
-      name: "\u0410\u0440\u043C\u0430\u0442\u0443\u0440\u0430|fall"
-      takeName: "\u0410\u0440\u043C\u0430\u0442\u0443\u0440\u0430|fall"
-      internalID: 4190498318799528425
-      firstFrame: 0
-      lastFrame: 79
-      wrapMode: 0
-      orientationOffsetY: 0
-      level: 0
-      cycleOffset: 0
-      loop: 0
-      hasAdditiveReferencePose: 0
-      loopTime: 0
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
-      keepOriginalOrientation: 0
-      keepOriginalPositionY: 1
-      keepOriginalPositionXZ: 0
-      heightFromFeet: 0
-      mirror: 0
-      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
-      events: []
-      transformMask: []
-      maskType: 3
-      maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
-    - serializedVersion: 16
-      name: "\u0410\u0440\u043C\u0430\u0442\u0443\u0440\u0430|jerk"
-      takeName: "\u0410\u0440\u043C\u0430\u0442\u0443\u0440\u0430|jerk"
-      internalID: -1135060499225558299
-      firstFrame: 0
-      lastFrame: 79
-      wrapMode: 0
-      orientationOffsetY: 0
-      level: 0
-      cycleOffset: 0
-      loop: 0
-      hasAdditiveReferencePose: 0
-      loopTime: 0
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
-      keepOriginalOrientation: 0
-      keepOriginalPositionY: 1
-      keepOriginalPositionXZ: 0
-      heightFromFeet: 0
-      mirror: 0
-      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
-      events: []
-      transformMask: []
-      maskType: 3
-      maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
+    clipAnimations: []
     isReadable: 0
   meshes:
     lODScreenPercentages: []

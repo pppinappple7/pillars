@@ -2,6 +2,10 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    
+    [SerializeField] GameObject gameCamera;
+    float dashTimer=0;
+    public Animator animator;
     [SerializeField] GameObject gameover;
     [SerializeField] GameObject[] disableOnLoose;
     [SerializeField] ScoreManager scoreManager;
@@ -17,12 +21,24 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+        if(animator.GetBool("dash")==true)
+        {
+            dashTimer += Time.deltaTime;
+            if(dashTimer>0.5f)
+            {
+                dashTimer = 0;
+                animator.SetBool("dash", false);
+            }
+        }
         if (curentPillar != null)
         {
             transform.position = curentPillar.transform.position + 9.2f * Vector3.up;
         }
         else
         {
+            transform.LookAt(gameCamera.transform.position);
+            animator.SetBool("dead",true);
             foreach (GameObject obj in disableOnLoose)
             {
                 obj.SetActive(false);

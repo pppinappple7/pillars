@@ -11,6 +11,7 @@ public class VirtualScreenClicker : MonoBehaviour
 
     private PointerEventData pointerData;
     private List<GameObject> hoveredObjects = new List<GameObject>();
+    private GameObject draggingObject;
 
     void Start()
     {
@@ -26,53 +27,125 @@ public class VirtualScreenClicker : MonoBehaviour
         {
             Vector2 uv = hit.textureCoord;
 
-            // Если оси инвертированы на новой модели, раскомментируй:
+            // Если оси инвертированы на модели, раскомментируй:
             // uv.x = 1f - uv.x; 
             // uv.y = 1f - uv.y; 
 
             float virtualX = uv.x * uiCamera.pixelWidth;
             float virtualY = uv.y * uiCamera.pixelHeight;
-            pointerData.position = new Vector2(virtualX, virtualY);
+            Vector2 newPosition = new Vector2(virtualX, virtualY);
 
-            // Имитируем движение мыши для EventSystem
-            List<RaycastResult> results = new List<RaycastResult>();
-            EventSystem.current.RaycastAll(pointerData, results);
-
-            // Используем стандартный механизм Unity для обработки Hover (наведения)
-            // Это заставит Event Trigger на любом объекте думать, что это реальная мышь
-            pointerData.pointerCurrentRaycast = results.Count > 0 ? results[0] : new RaycastResult();
-
-            // Заставляем Unity обработать Enter/Exit для всех элементов в иерархии под курсором
-            HandlePointerExitAndEnter(pointerData, results.Count > 0 ? results[0].gameObject : null);
-
-            // Обработка клика
-            if (Input.GetMouseButtonDown(0) && results.Count > 0)
+            if (hoveredObjects.Count == 0)
             {
-                GameObject target = results[0].gameObject;
+                pointerData.position = newPosition;
+            }
 
-                // Проверяем обычную кнопку
-                Button button = target.GetComponentInParent<Button>();
-                if (button != null) target = button.gameObject;
+            pointerData.delta = newPosition - pointerData.position;
+            pointerData.position = newPosition;
 
-                ExecuteEvents.Execute(target, pointerData, ExecuteEvents.pointerClickHandler);
+            // Собираем элементы интерфейса под виртуальной мышью
+            List<RaycastResult> raycastResults = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(pointerData, raycastResults);
+
+            // Записываем результат рейкаста в PointerEventData
+            if (raycastResults.Count > 0)
+            {
+                pointerData.pointerCurrentRaycast = raycastResults[0];
+            }
+            else
+            {
+                pointerData.pointerCurrentRaycast = new RaycastResult();
+            }
+
+            // Обрабатываем наведение (Hover), берём первый объект из списка результатов
+            GameObject currentTarget = raycastResults.Count > 0 ? raycastResults[0].gameObject : null;
+            HandlePointerExitAndEnter(pointerData, currentTarget);
+
+            // 1. Нажатие мыши (PointerDown)
+            if (Input.GetMouseButtonDown(0) && raycastResults.Count > 0)
+            {
+                GameObject target = raycastResults[0].gameObject;
+
+                pointerData.pressPosition = newPosition;
+                pointerData.pointerPressRaycast = pointerData.pointerCurrentRaycast;
+
+                pointerData.pointerPress = ExecuteEvents.GetEventHandler<IPointerDownHandler>(target);
+
+                if (pointerData.pointerPress != null)
+                {
+                    ExecuteEvents.Execute(pointerData.pointerPress, pointerData, ExecuteEvents.pointerDownHandler);
+                }
+
+                pointerData.pointerDrag = ExecuteEvents.GetEventHandler<IDragHandler>(target);
+                if (pointerData.pointerDrag != null)
+                {
+                    ExecuteEvents.Execute(pointerData.pointerDrag, pointerData, ExecuteEvents.initializePotentialDrag);
+                    ExecuteEvents.Execute(pointerData.pointerDrag, pointerData, ExecuteEvents.beginDragHandler);
+                    pointerData.dragging = true;
+                    draggingObject = pointerData.pointerDrag;
+                }
+            }
+
+            // 2. Удерживание и движение (Drag)
+            if (Input.GetMouseButton(0) && draggingObject != null)
+            {
+                ExecuteEvents.Execute(draggingObject, pointerData, ExecuteEvents.dragHandler);
+            }
+
+            // 3. Отпускание мыши (PointerUp)
+            if (Input.GetMouseButtonUp(0))
+            {
+                if (pointerData.pointerPress != null)
+                {
+                    ExecuteEvents.Execute(pointerData.pointerPress, pointerData, ExecuteEvents.pointerUpHandler);
+
+                    GameObject target = raycastResults.Count > 0 ? raycastResults[0].gameObject : null;
+                    if (target != null)
+                    {
+                        GameObject clickHandler = ExecuteEvents.GetEventHandler<IPointerClickHandler>(target);
+                        if (clickHandler != null)
+                        {
+                            ExecuteEvents.Execute(clickHandler, pointerData, ExecuteEvents.pointerClickHandler);
+                        }
+                    }
+                }
+
+                if (draggingObject != null)
+                {
+                    ExecuteEvents.Execute(draggingObject, pointerData, ExecuteEvents.endDragHandler);
+                    draggingObject = null;
+                }
+
+                pointerData.pointerPress = null;
+                pointerData.pointerDrag = null;
+                pointerData.dragging = false;
             }
         }
         else
         {
-            // Если убрали мышь с монитора, очищаем все наведения
             HandlePointerExitAndEnter(pointerData, null);
+            if (Input.GetMouseButtonUp(0) || !Input.GetMouseButton(0))
+            {
+                if (draggingObject != null)
+                {
+                    ExecuteEvents.Execute(draggingObject, pointerData, ExecuteEvents.endDragHandler);
+                    draggingObject = null;
+                }
+                pointerData.pointerPress = null;
+                pointerData.pointerDrag = null;
+                pointerData.dragging = false;
+            }
         }
     }
 
     private void HandlePointerExitAndEnter(PointerEventData currentPointerData, GameObject currentTarget)
     {
-        // Функция полностью имитирует системный проход мыши по кнопкам,
-        // дергая Event Trigger (Pointer Enter / Pointer Exit) у любого объекта автоматичеки
         if (currentTarget == null)
         {
             for (int i = 0; i < hoveredObjects.Count; i++)
             {
-                ExecuteEvents.Execute(hoveredObjects[i], currentPointerData, ExecuteEvents.pointerExitHandler);
+                if (hoveredObjects[i] != null)
+                    ExecuteEvents.Execute(hoveredObjects[i], currentPointerData, ExecuteEvents.pointerExitHandler);
             }
             hoveredObjects.Clear();
             return;
@@ -80,14 +153,13 @@ public class VirtualScreenClicker : MonoBehaviour
 
         if (hoveredObjects.Count > 0 && hoveredObjects[0] == currentTarget) return;
 
-        // Очищаем старые
         for (int i = 0; i < hoveredObjects.Count; i++)
         {
-            ExecuteEvents.Execute(hoveredObjects[i], currentPointerData, ExecuteEvents.pointerExitHandler);
+            if (hoveredObjects[i] != null)
+                ExecuteEvents.Execute(hoveredObjects[i], currentPointerData, ExecuteEvents.pointerExitHandler);
         }
         hoveredObjects.Clear();
 
-        // Добавляем новые элементы и всю их иерархию родителей (важно для Event Trigger)
         GameObject t = currentTarget;
         while (t != null)
         {
