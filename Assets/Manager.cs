@@ -21,7 +21,7 @@ public class Manager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        speedMult += Time.deltaTime / 240;
+        speedMult += Time.deltaTime / 480;
         if (Input.GetKey(KeyCode.Escape))
         {
             pause.SetActive(true);

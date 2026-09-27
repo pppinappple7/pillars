@@ -5,7 +5,9 @@ using UnityEngine.Events;
 
 public class eventManager : MonoBehaviour
 {
-
+    float trainTime;
+    [SerializeField] GameObject trainObj;
+    [SerializeField] LineRenderer trainLine;
     [SerializeField] AudioSource shootSfx;
     [SerializeField] GameObject globalLight;
     [SerializeField] GameObject projectors;
@@ -34,6 +36,17 @@ public class eventManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(trainTime>0)
+        {
+            trainTime += Time.deltaTime;
+        }
+        
+        if (trainTime>6)
+        {
+            trainObj.SetActive(false);
+            trainTime = 0;
+            trainLine.gameObject.SetActive(false);
+        }
         if(projectors.activeSelf)
         {
             projectorsTime += Time.deltaTime * manager.speedMult;
@@ -97,5 +110,26 @@ public class eventManager : MonoBehaviour
     {
         projectors.SetActive(true);
         globalLight.SetActive(false);
+    }
+    public void train()
+    {
+        trainTime += Time.deltaTime;
+        List<GameObject> pillars = new List<GameObject>(GameObject.FindGameObjectsWithTag("pillar"));
+        int i = UnityEngine.Random.Range(0, pillars.Count);
+        Vector3 point1 = pillars[i].transform.position;
+        point1.y = 0;
+        pillars.Remove(pillars[1]);
+        i = UnityEngine.Random.Range(0, pillars.Count);
+        Vector3 point2 = pillars[i].transform.position;
+        point2.y = 0;
+        Vector3 truePoint1 = (point2 - point1) * 11;
+        Vector3 truePoint2 = (point1 - point2) * 11;
+        trainLine.gameObject.SetActive(true);
+        trainLine.SetPosition(0, truePoint1);
+        trainLine.SetPosition(1, truePoint2);
+        trainObj.SetActive(true);
+        trainObj.transform.position = truePoint1;
+        trainObj.transform.LookAt(truePoint2);
+        //trainObj.transform.eulerAngles=new Vector3(0,transform.eulerAngles.y,0);
     }
 }

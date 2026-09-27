@@ -13,7 +13,7 @@ public class MenuFunctions : MonoBehaviour
     {
         if(audioMixer != null)
         {
-            if(PlayerPrefs.GetFloat("volume",1f)!=0)
+            if(PlayerPrefs.GetFloat("volume", 0.6f) !=0)
             {
                 audioMixer.SetFloat("MasterVolume", Mathf.Lerp(-50, 0, PlayerPrefs.GetFloat("volume", 1f)));
             }
@@ -29,7 +29,7 @@ public class MenuFunctions : MonoBehaviour
     {
         if(slider!=null)
         {
-            slider.value = PlayerPrefs.GetFloat("volume") * 100;
+            slider.value = PlayerPrefs.GetFloat("volume",0.6f) * 100;
         }
        
         if (pause)
@@ -61,7 +61,7 @@ public class MenuFunctions : MonoBehaviour
         volumeText.text = volume.ToString();
         if (audioMixer != null)
         {
-            if (PlayerPrefs.GetFloat("volume", 1f) != 0)
+            if (PlayerPrefs.GetFloat("volume", 0.6f) != 0)
             {
                 audioMixer.SetFloat("MasterVolume", Mathf.Lerp(-50, 0, PlayerPrefs.GetFloat("volume", 1f)));
             }

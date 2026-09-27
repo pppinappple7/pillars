@@ -8,6 +8,7 @@ public class key : MonoBehaviour
     KeyCode keyCode;
     void Start()
     {
+        audioSource = gameObject.GetComponent<AudioSource>();
         keyCode = (KeyCode)System.Enum.Parse(typeof(KeyCode), letter);
     }
 
