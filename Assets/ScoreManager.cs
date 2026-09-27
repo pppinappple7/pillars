@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class ScoreManager : MonoBehaviour
 {
+    [SerializeField] Manager manager;
     [SerializeField] TextMeshProUGUI pointText;
     bool counting =true;
     public float score;
@@ -18,7 +19,7 @@ public class ScoreManager : MonoBehaviour
         pointText.text = ((int)score).ToString();
         if(counting)
         {
-            score += Time.deltaTime * 10f;
+            score += manager.speedMult*Time.deltaTime * 10f;
         }
         
     }

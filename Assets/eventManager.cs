@@ -5,6 +5,12 @@ using UnityEngine.Events;
 
 public class eventManager : MonoBehaviour
 {
+
+    [SerializeField] AudioSource shootSfx;
+    [SerializeField] GameObject globalLight;
+    [SerializeField] GameObject projectors;
+    Manager manager;
+    float projectorsTime=0;
     Player player;
     [Serializable]class Event
     {
@@ -18,6 +24,7 @@ public class eventManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        manager = GameObject.Find("spawnManager").GetComponent<Manager>();
         player = GameObject.Find("player").GetComponent<Player>();
         foreach (Event e in events)
         {
@@ -27,6 +34,15 @@ public class eventManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(projectors.activeSelf)
+        {
+            projectorsTime += Time.deltaTime * manager.speedMult;
+            if(projectorsTime>=8)
+            {
+                projectors.SetActive(false);
+                globalLight.SetActive(true);
+            }
+        }
         foreach (Event e in events)
         {
             e.timer += Time.deltaTime;
@@ -52,12 +68,34 @@ public class eventManager : MonoBehaviour
             player.curentPillar.GetComponent<pillar>().Shoot();
         }
     }
-    public void Train()
+    public void Guns()
     {
-
+        shootSfx.Play();
+        GameObject[] pillars = GameObject.FindGameObjectsWithTag("pillar");
+        int i = UnityEngine.Random.Range(0, pillars.Length);
+        if (pillars[i].GetComponent<pillar>().shootTime==0)
+        {
+            pillars[i].GetComponent<pillar>().Gun();
+        }
+        else
+        {
+            i = UnityEngine.Random.Range(0, pillars.Length);
+            pillars[i].GetComponent<pillar>().Gun();
+        }
+        i = UnityEngine.Random.Range(0, pillars.Length);
+        if (pillars[i].GetComponent<pillar>().shootTime == 0)
+        {
+            pillars[i].GetComponent<pillar>().Gun();
+        }
+        else
+        {
+            i = UnityEngine.Random.Range(0, pillars.Length);
+            pillars[i].GetComponent<pillar>().Gun();
+        }
     }
     public void Projectors()
     {
-        
+        projectors.SetActive(true);
+        globalLight.SetActive(false);
     }
 }

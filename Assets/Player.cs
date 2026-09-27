@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    
     [SerializeField] GameObject gameCamera;
     float dashTimer=0;
     public Animator animator;
